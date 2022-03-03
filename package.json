@@ -1,0 +1,11 @@
+{
+  "name": "@codexporer.io/expo-loading-dialog",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "peerDependencies": {
+    "react": "*",
+    "react-sweet-state": "*",
+    "react-native-paper": "*",
+    "styled-components": "*"
+  }
+}
