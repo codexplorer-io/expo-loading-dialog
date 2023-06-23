@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { createStore, createHook } from 'react-sweet-state';
 import { Portal, ActivityIndicator, useTheme } from 'react-native-paper';
 import {
+    initialState,
+    actions,
+    selector
+} from '@codexporer.io/expo-link-stores';
+import {
     Dialog,
     ContentRoot,
     HorizontalSpacer,
@@ -11,10 +16,12 @@ import {
 
 const Store = createStore({
     initialState: {
+        ...initialState,
         isVisible: false,
         message: ''
     },
     actions: {
+        ...actions,
         show: ({ message = '' } = {}) => ({ setState }) => setState({ isVisible: true, message }),
         setMessage: message => ({ setState }) => setState({ message }),
         hide: () => ({ setState }) => setState({ isVisible: false })
@@ -22,7 +29,7 @@ const Store = createStore({
     name: 'LoadingDialogActions'
 });
 
-const useLoadingDialogState = createHook(Store);
+const useLoadingDialogState = createHook(Store, { selector: state => selector(state) });
 
 export const useLoadingDialogActions = createHook(Store, { selector: null });
 

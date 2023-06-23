@@ -6,6 +6,7 @@
     "react": "*",
     "react-sweet-state": "*",
     "react-native-paper": "*",
-    "styled-components": "*"
+    "styled-components": "*",
+    "@codexporer.io/expo-link-stores": "*"
   }
 }
