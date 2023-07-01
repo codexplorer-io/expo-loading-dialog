@@ -90,7 +90,7 @@ useLoadingDialogActions|hook used to control loading dialog visibility and messa
 ## useLoadingDialogActions
 Returns an array with `show`, `setMessage` and `hide` actions on the second index:
 ```
-const [, { show, setMessage, hide }] = useMessageDialogActions();
+const [, { show, setMessage, hide }] = useLoadingDialogActions();
 
 ...
 show({ message: initialMessage });
