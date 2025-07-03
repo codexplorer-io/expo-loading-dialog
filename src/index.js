@@ -11,7 +11,9 @@ import {
     ContentRoot,
     HorizontalSpacer,
     Message,
-    LoadingRoot
+    LoadingRoot,
+    DIALOG_PADDING,
+    SPACER_SIZE
 } from './styled';
 
 const Store = createStore({
@@ -33,25 +35,25 @@ const useLoadingDialogState = createHook(Store, { selector: state => selector(st
 
 export const useLoadingDialogActions = createHook(Store, { selector: null });
 
-const LOADING_SIZE = 40;
-const DIALOG_PADDING = 20 * 2;
-
 export const LoadingDialog = () => {
     const [{ isVisible, message }] = useLoadingDialogState();
     const [messageHeight, setMessageHeight] = useState(0);
+    const [loadingHeight, setLoadingHeight] = useState(0);
     const theme = useTheme();
 
     useEffect(() => {
         messageHeight && !message && setMessageHeight(0);
     }, [message, messageHeight]);
 
-    const onMessageLayout = ({
-        nativeEvent: { layout: { height } }
-    }) => {
-        setMessageHeight(height + 10);
+    const onMessageLayout = ({ nativeEvent }) => {
+        setMessageHeight(nativeEvent.layout.height + 10);
     };
 
-    const dialogHeight = DIALOG_PADDING + LOADING_SIZE + messageHeight;
+    const onLoadingLayout = ({ nativeEvent }) => {
+        setLoadingHeight(nativeEvent.layout.height + 10);
+    };
+
+    const dialogHeight = (DIALOG_PADDING * 2) + SPACER_SIZE + loadingHeight + messageHeight;
 
     return (
         <Portal>
@@ -61,7 +63,7 @@ export const LoadingDialog = () => {
                 height={dialogHeight}
             >
                 <ContentRoot>
-                    <LoadingRoot>
+                    <LoadingRoot onLayout={onLoadingLayout}>
                         <ActivityIndicator
                             animating
                             color={theme.colors.primary}

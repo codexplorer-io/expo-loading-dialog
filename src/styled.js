@@ -1,12 +1,14 @@
 import styled from 'styled-components/native';
 import { Dialog as RnpDialog, Text } from 'react-native-paper';
 
+export const DIALOG_PADDING = 20;
+export const SPACER_SIZE = 20;
+
 export const Dialog = styled(RnpDialog)`
     max-width: 50%;
     align-self: center;
-    flex: ${({ height }) => `0 0 ${height}px`};
-    padding: 20px;
-    padding-top: 20px;
+    height: ${({ height }) => `${height}px`};
+    padding: ${DIALOG_PADDING}px;
     overflow: visible;
 `;
 
@@ -18,15 +20,17 @@ export const ContentRoot = styled.View`
 `;
 
 export const HorizontalSpacer = styled.View`
-    height: 20px;
+    height: ${SPACER_SIZE}px;
 `;
 
 export const Message = styled(Text)`
     text-align: center;
+    color: ${({ theme }) => theme.colors.primary};
+    font-size: 16px;
+    font-weight: 600;
 `;
 
 export const LoadingRoot = styled.View`
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
