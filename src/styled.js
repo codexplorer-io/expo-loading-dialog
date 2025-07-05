@@ -25,7 +25,7 @@ export const HorizontalSpacer = styled.View`
 
 export const Message = styled(Text)`
     text-align: center;
-    color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.foreground};
     font-size: 16px;
     font-weight: 600;
 `;
