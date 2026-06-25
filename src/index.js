@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { createStore, createHook } from 'react-sweet-state';
-import { Portal, ActivityIndicator, useTheme } from 'react-native-paper';
+import {
+    Portal,
+    ActivityIndicator,
+    useTheme,
+    Button
+} from 'react-native-paper';
 import {
     initialState,
     actions,
@@ -20,11 +25,12 @@ const Store = createStore({
     initialState: {
         ...initialState,
         isVisible: false,
-        message: ''
+        message: '',
+        actions: null
     },
     actions: {
         ...actions,
-        show: ({ message = '' } = {}) => ({ setState }) => setState({ isVisible: true, message }),
+        show: ({ message = '', actions = null } = {}) => ({ setState }) => setState({ isVisible: true, message, actions }),
         setMessage: message => ({ setState }) => setState({ message }),
         hide: () => ({ setState }) => setState({ isVisible: false })
     },
@@ -36,7 +42,7 @@ const useLoadingDialogState = createHook(Store, { selector: state => selector(st
 export const useLoadingDialogActions = createHook(Store, { selector: null });
 
 export const LoadingDialog = () => {
-    const [{ isVisible, message }] = useLoadingDialogState();
+    const [{ isVisible, message, actions }] = useLoadingDialogState();
     const [messageHeight, setMessageHeight] = useState(0);
     const [loadingHeight, setLoadingHeight] = useState(0);
     const theme = useTheme();
@@ -78,6 +84,18 @@ export const LoadingDialog = () => {
                             </Message>
                         </>
                     )}
+                    {actions?.length > 0 && actions.map(({ title, onPress }, index) => (
+                        <Fragment key={index}>
+                            <HorizontalSpacer height={index === 0 ? SPACER_SIZE : 10} />
+                            <Button
+                                mode='outlined'
+                                onPress={onPress}
+                                style={{ width: '100%' }}
+                            >
+                                {title}
+                            </Button>
+                        </Fragment>
+                    ))}
                 </ContentRoot>
             </Dialog>
         </Portal>

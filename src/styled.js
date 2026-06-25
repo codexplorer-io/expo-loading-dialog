@@ -7,7 +7,7 @@ export const SPACER_SIZE = 20;
 export const Dialog = styled(RnpDialog)`
     max-width: 50%;
     align-self: center;
-    height: ${({ height }) => `${height}px`};
+    min-height: ${({ height }) => `${height}px`};
     padding: ${DIALOG_PADDING}px;
     overflow: visible;
 `;
@@ -20,7 +20,7 @@ export const ContentRoot = styled.View`
 `;
 
 export const HorizontalSpacer = styled.View`
-    height: ${SPACER_SIZE}px;
+    height: ${({ height = SPACER_SIZE }) => height}px;
 `;
 
 export const Message = styled(Text)`
