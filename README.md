@@ -62,22 +62,23 @@ export function AppProviders({ children }) {
 Use `useLoadingDialogActions()` anywhere in your component tree or store actions to trigger or hide the dialog overlay.
 
 ```tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from 'react-native';
 import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
 
-export function SyncButton() {
-  const [, { show, setMessage, hide }] = useLoadingDialogActions();
+export function SyncScreen({ isSyncing }: { isSyncing: boolean }) {
+  const [, { show: showLoadingDialog, hide: hideLoadingDialog }] = useLoadingDialogActions();
 
-  const handleSync = async () => {
-    show({ message: 'Syncing baby logs...' });
-    try {
-      await performSync();
-    } finally {
-      hide();
+  useEffect(() => {
+    if (isSyncing) {
+      showLoadingDialog({ message: 'Syncing baby logs...' });
+    } else {
+      hideLoadingDialog();
     }
-  };
 
-  return <Button title="Sync Data" onPress={handleSync} />;
+    return () => hideLoadingDialog();
+  }, [isSyncing, showLoadingDialog, hideLoadingDialog]);
+
+  return <Button title="Sync Data" onPress={() => console.log('Syncing...')} />;
 }
 ```
