@@ -23,9 +23,23 @@ const Store = createStore({
     },
     actions: {
         ...actions,
-        show: ({ message = '', actions = null } = {}) => ({ setState }) => setState({ isVisible: true, message, actions }),
-        setMessage: message => ({ setState }) => setState({ message }),
-        hide: () => ({ setState }) => setState({ isVisible: false })
+        show: ({ message = '', actions = null } = {}) => ({ setState, getState }) => {
+            const current = getState();
+            if (!current.isVisible || current.message !== message || current.actions !== actions) {
+                setState({ isVisible: true, message, actions });
+            }
+        },
+        setMessage: message => ({ setState, getState }) => {
+            if (getState().message !== message) {
+                setState({ message });
+            }
+        },
+        hide: () => ({ setState, getState }) => {
+            const current = getState();
+            if (current.isVisible || current.message || current.actions) {
+                setState({ isVisible: false, message: '', actions: null });
+            }
+        }
     },
     name: 'LoadingDialogActions'
 });
