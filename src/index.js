@@ -1,25 +1,18 @@
-import React, { useState, useEffect, Fragment } from 'react';
-import { createStore, createHook } from 'react-sweet-state';
+import React, { createContext, useContext } from 'react';
 import {
-    Portal,
+    Modal,
+    View,
+    Text,
+    TouchableOpacity,
     ActivityIndicator,
-    useTheme,
-    Button
-} from 'react-native-paper';
+    StyleSheet
+} from 'react-native';
+import { createStore, createHook } from 'react-sweet-state';
 import {
     initialState,
     actions,
     selector
 } from '@codexporer.io/expo-link-stores';
-import {
-    Dialog,
-    ContentRoot,
-    HorizontalSpacer,
-    Message,
-    LoadingRoot,
-    DIALOG_PADDING,
-    SPACER_SIZE
-} from './styled';
 
 const Store = createStore({
     initialState: {
@@ -41,63 +34,120 @@ const useLoadingDialogState = createHook(Store, { selector: state => selector(st
 
 export const useLoadingDialogActions = createHook(Store, { selector: null });
 
-export const LoadingDialog = () => {
-    const [{ isVisible, message, actions }] = useLoadingDialogState();
-    const [messageHeight, setMessageHeight] = useState(0);
-    const [loadingHeight, setLoadingHeight] = useState(0);
-    const theme = useTheme();
+const LoadingDialogContext = createContext(null);
 
-    useEffect(() => {
-        messageHeight && !message && setMessageHeight(0);
-    }, [message, messageHeight]);
-
-    const onMessageLayout = ({ nativeEvent }) => {
-        setMessageHeight(nativeEvent.layout.height + 10);
-    };
-
-    const onLoadingLayout = ({ nativeEvent }) => {
-        setLoadingHeight(nativeEvent.layout.height + 10);
-    };
-
-    const dialogHeight = (DIALOG_PADDING * 2) + SPACER_SIZE + loadingHeight + messageHeight;
-
+export const LoadingDialogProvider = ({ children, theme }) => {
     return (
-        <Portal>
-            <Dialog
-                visible={isVisible}
-                dismissable={false}
-                height={dialogHeight}
-            >
-                <ContentRoot>
-                    <LoadingRoot onLayout={onLoadingLayout}>
-                        <ActivityIndicator
-                            animating
-                            color={theme.colors.primary}
-                            size='large'
-                        />
-                    </LoadingRoot>
-                    {!!message && (
-                        <>
-                            <HorizontalSpacer />
-                            <Message onLayout={onMessageLayout}>
-                                {message}
-                            </Message>
-                        </>
-                    )}
-                    {actions?.length > 0 && actions.map(({ title, onPress }, index) => (
-                        <Fragment key={index}>
-                            <HorizontalSpacer height={index === 0 ? SPACER_SIZE : 10} />
-                            <Button
-                                mode='outlined'
-                                onPress={onPress}
-                                style={{ width: '100%' }}
-                            >
-                                {title}
-                            </Button>
-                        </Fragment>
-                    ))}
-                </ContentRoot>
-            </Dialog>
-        </Portal>
+        <LoadingDialogContext.Provider value={theme}>
+            {children}
+            <LoadingDialog />
+        </LoadingDialogContext.Provider>
     );
 };
+
+const useLoadingDialogTheme = () => {
+    const context = useContext(LoadingDialogContext);
+    if (!context) {
+        throw new Error('useLoadingDialogTheme must be used within a LoadingDialogProvider with a mandatory theme prop.');
+    }
+    return context;
+};
+
+const LoadingDialog = () => {
+    const [{ isVisible, message, actions }] = useLoadingDialogState();
+    const theme = useLoadingDialogTheme();
+    const { colors } = theme;
+
+    if (!isVisible) {
+        return null;
+    }
+
+    return (
+        <Modal
+            visible={isVisible}
+            transparent
+            animationType="fade"
+            statusBarTranslucent
+        >
+            <View style={[styles.overlay, { backgroundColor: colors.overlayBackground }]}>
+                <View style={[styles.dialogContainer, { backgroundColor: colors.dialogBackground, shadowColor: colors.shadowColor }]}>
+                    <View style={styles.spinnerContainer}>
+                        <ActivityIndicator
+                            animating
+                            color={colors.spinner}
+                            size="large"
+                        />
+                    </View>
+                    {!!message && (
+                        <Text style={[styles.message, { color: colors.messageText }]}>
+                            {message}
+                        </Text>
+                    )}
+                    {actions?.length > 0 && actions.map(({ title, onPress }, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={onPress}
+                            style={[
+                                styles.button,
+                                {
+                                    backgroundColor: colors.buttonBackground,
+                                    borderColor: colors.buttonBorder
+                                }
+                            ]}
+                        >
+                            <Text style={[styles.buttonText, { color: colors.buttonText }]}>
+                                {title}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </View>
+        </Modal>
+    );
+};
+
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24
+    },
+    dialogContainer: {
+        minWidth: 140,
+        minHeight: 140,
+        maxWidth: 400,
+        aspectRatio: 1,
+        borderRadius: 16,
+        padding: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4
+    },
+    spinnerContainer: {
+        padding: 8
+    },
+    message: {
+        marginTop: 16,
+        fontSize: 15,
+        fontWeight: '500',
+        textAlign: 'center',
+        lineHeight: 22
+    },
+    button: {
+        width: '100%',
+        marginTop: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        alignItems: 'center'
+    },
+    buttonText: {
+        fontSize: 16,
+        fontWeight: '600'
+    }
+});

@@ -2,11 +2,12 @@
   "name": "@codexporer.io/expo-loading-dialog",
   "version": "1.0.0",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "peerDependencies": {
     "react": "*",
+    "react-native": "*",
     "react-sweet-state": "*",
-    "react-native-paper": "*",
-    "styled-components": "*",
-    "@codexporer.io/expo-link-stores": "*"
+    "@codexporer.io/expo-link-stores": "*",
+    "deprecated-react-native-prop-types": "*"
   }
 }

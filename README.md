@@ -1,112 +1,83 @@
-# expo-loading-dialog
-Loading dialog for react-native & expo.
+# `@codexporer.io/expo-loading-dialog`
 
-## Platform Compatibility
-iOS|Android|Web|
--|-|-|
-✅|✅|❌|
-
-## Samples
-
-<img title="Loading dialog" src="https://github.com/codexplorer-io/expo-loading-dialog/blob/main/samples/recording.gif?raw=true">
+Global modal loading dialog state management and component for React Native applications. Automatically renders its overlay when mounted at the app root.
 
 ## Prerequisites
-Module requires `styled-components`, `react-sweet-state`, `react-native-paper` and some theme variable initalizations before it can be used, and to be rendered as an app parent.
 
-Required theme variables:
+Ensure `react-sweet-state`, `deprecated-react-native-prop-types`, and `@codexporer.io/expo-link-stores` are installed in your workspace:
 
-- **colors.primary** - Spinner color used when dialog is displayed
+```bash
+yarn add react-sweet-state deprecated-react-native-prop-types
+```
 
-```javascript
-import { ThemeProvider } from 'styled-components';
-import { App } from './app';
+## Theme & Provider Setup
 
-const theme = {
+Wrap your application root inside `LoadingDialogProvider` and supply a mandatory `theme` object. `LoadingDialogProvider` automatically renders the `<LoadingDialog />` overlay component internally.
+
+### `LoadingDialogTheme` Interface
+
+```typescript
+interface LoadingDialogTheme {
+  colors: {
+    dialogBackground: string;   // Dialog container background color
+    spinner: string;            // ActivityIndicator loading spinner color
+    messageText: string;        // Loading message text color
+    buttonText: string;         // Action button text color
+    buttonBackground: string;   // Action button background color
+    buttonBorder: string;       // Action button border color
+    overlayBackground: string; // Backdrop overlay background color
+  };
+}
+```
+
+### Setup Example
+
+```tsx
+import React, { useMemo } from 'react';
+import { LoadingDialogProvider, LoadingDialogTheme } from '@codexporer.io/expo-loading-dialog';
+
+export function AppProviders({ children }) {
+  const loadingDialogTheme = useMemo<LoadingDialogTheme>(() => ({
     colors: {
-        primary: primaryColor,
-        ...
-    },
-    ...
-};
+      dialogBackground: '#ffffff',
+      spinner: '#6366f1',
+      messageText: '#18181b',
+      buttonText: '#6366f1',
+      buttonBackground: '#f4f4f5',
+      buttonBorder: '#e4e4e7',
+      overlayBackground: 'rgba(0, 0, 0, 0.5)'
+    }
+  }), []);
 
-export const AppThemeWrapper = () => (
-    <ThemeProvider theme={theme}>
-        <App />
-    </ThemeProvider>
-);
+  return (
+    <LoadingDialogProvider theme={loadingDialogTheme}>
+      {children}
+    </LoadingDialogProvider>
+  );
+}
 ```
 
-## Usage
-Before dialog can be displayed, it needs to be rendered within `App` as a descendant of theme providers:
-```javascript
-import { LoadingDialog } from '@codexporer.io/expo-loading-dialog';
-...
+## Hook Usage
 
-export const App = () => (
-    <>
-        <LoadingDialog />
-        ...other app components
-    </>
-);
-```
-When `LoadingDialog` component is rendered, it can be displayed from anywhere within the app:
-```javascript
+Use `useLoadingDialogActions()` anywhere in your component tree or store actions to trigger or hide the dialog overlay.
+
+```tsx
+import React from 'react';
+import { Button } from 'react-native';
 import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
-...
 
-export const MyComponent = () => {
-    const [, { show, setMessage, hide }] = useLoadingDialogActions();
+export function SyncButton() {
+  const [, { show, setMessage, hide }] = useLoadingDialogActions();
 
-    const onStartLoading = async () => {
-        show({ message: 'Loading started...' });
-        await sleep(3000);
-        setMessage('Updating...');
-        await sleep(2000);
-        setMessage('Finishing...');
-        await sleep(1000);
-        hide();
-    };
+  const handleSync = async () => {
+    show({ message: 'Syncing baby logs...' });
+    try {
+      await performSync();
+    } finally {
+      hide();
+    }
+  };
 
-    return (
-        <>
-            <Button
-                mode='outlined'
-                onPress={onStartLoading}
-            >
-                Start Loading
-            </Button>
-            ... other components
-        </>
-    );
-};
+  return <Button title="Sync Data" onPress={handleSync} />;
+}
 ```
-
-## Exports
-symbol|description|
--|-|
-LoadingDialog|loading dialog component|
-useLoadingDialogActions|hook used to control loading dialog visibility and message|
-
-## useLoadingDialogActions
-Returns an array with `show`, `setMessage` and `hide` actions on the second index:
-```
-const [, { show, setMessage, hide }] = useLoadingDialogActions();
-
-...
-show({ message: initialMessage });
-...
-setMessage(desiredNewMessageWhileDialogIsVisible);
-...
-hide();
-```
-
-### Show action parameters
-parameter|description|
--|-|
-message|optional message displayed in message dialog. If no message is passed in, spinner will be displayed. (default value: empty string)|
-
-
-### Set message action parameters
-parameter|description|
--|-|
-message|message displayed in message dialog. If empty string is passed in, spinner will be displayed|
