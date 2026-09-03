@@ -12,3 +12,4 @@ Imperative and hook-driven loading dialog overlay powered by `react-sweet-state`
 - Destructure actions: `const [, { show: showLoadingDialog, hide: hideLoadingDialog }] = useLoadingDialogActions();`
 - Do NOT use optional chaining (`?.`) on `showLoadingDialog` or `hideLoadingDialog`.
 - In `useEffect` hooks, always supply clean-up: `return () => hideLoadingDialog();`.
+- **Memoize Theme Objects**: Wrap inline `theme` objects in `useMemo` when rendered inside React components (or define statically outside component body) to preserve reference stability.
