@@ -25,7 +25,7 @@ const Store = createStore({
         ...actions,
         show: ({ message = '', actions = null } = {}) => ({ setState, getState }) => {
             const current = getState();
-            if (!current.isVisible || current.message !== message || current.actions !== actions) {
+            if (current.message !== message || current.actions !== actions) {
                 setState({ isVisible: true, message, actions });
             }
         },
