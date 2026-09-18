@@ -158,8 +158,7 @@ const styles = StyleSheet.create({
     dialogContainer: {
         minWidth: 140,
         minHeight: 140,
-        maxWidth: 400,
-        aspectRatio: 1,
+        maxWidth: 250,
         borderRadius: 16,
         padding: 20,
         alignItems: 'center',
