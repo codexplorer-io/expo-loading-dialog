@@ -1,11 +1,11 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
-    Modal,
     View,
     Text,
     TouchableOpacity,
     ActivityIndicator,
-    StyleSheet
+    StyleSheet,
+    Animated
 } from 'react-native';
 import { createStore, createHook } from 'react-sweet-state';
 import {
@@ -72,16 +72,40 @@ const LoadingDialog = () => {
     const theme = useLoadingDialogTheme();
     const { colors } = theme;
 
-    if (!isVisible) {
+    const [mounted, setMounted] = useState(isVisible);
+    const opacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (isVisible) {
+            setMounted(true);
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true
+            }).start();
+        } else {
+            Animated.timing(opacity, {
+                toValue: 0,
+                duration: 150,
+                useNativeDriver: true
+            }).start(() => {
+                setMounted(false);
+            });
+        }
+    }, [isVisible, opacity]);
+
+    if (!mounted) {
         return null;
     }
 
     return (
-        <Modal
-            visible={isVisible}
-            transparent
-            animationType="fade"
-            statusBarTranslucent
+        <Animated.View
+            style={[
+                StyleSheet.absoluteFill,
+                styles.overlayContainer,
+                { opacity }
+            ]}
+            pointerEvents={isVisible ? 'auto' : 'none'}
         >
             <View style={[styles.overlay, { backgroundColor: colors.overlayBackground }]}>
                 <View style={[styles.dialogContainer, { backgroundColor: colors.dialogBackground, shadowColor: colors.shadowColor }]}>
@@ -116,11 +140,15 @@ const LoadingDialog = () => {
                     ))}
                 </View>
             </View>
-        </Modal>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
+    overlayContainer: {
+        zIndex: 99999,
+        elevation: 99999,
+    },
     overlay: {
         flex: 1,
         justifyContent: 'center',
