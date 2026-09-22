@@ -5,7 +5,8 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     StyleSheet,
-    Animated
+    Animated,
+    BackHandler
 } from 'react-native';
 import { createStore, createHook } from 'react-sweet-state';
 import {
@@ -93,6 +94,20 @@ const LoadingDialog = () => {
             });
         }
     }, [isVisible, opacity]);
+
+    useEffect(() => {
+        if (!isVisible) {
+            return;
+        }
+
+        const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+            return true;
+        });
+
+        return () => {
+            subscription?.remove();
+        };
+    }, [isVisible]);
 
     if (!mounted) {
         return null;
