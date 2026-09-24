@@ -119,7 +119,7 @@ export const LoadingDialog: React.FC = () => {
             ]}
             pointerEvents={isVisible ? 'auto' : 'none'}
         >
-            <View style={[styles.overlay, { backgroundColor: 'rgba(0, 0, 0, 0.6)' }]}>
+            <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
                 <View style={[styles.dialogContainer, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
                     <View style={styles.spinnerContainer}>
                         <ActivityIndicator
@@ -141,7 +141,7 @@ export const LoadingDialog: React.FC = () => {
                                     title={title}
                                     onPress={onPress}
                                     variant={ButtonVariant.Secondary}
-                                    size={ButtonSize.Medium}
+                                    size={ButtonSize.Small}
                                     style={styles.actionButton}
                                 />
                             ))}
