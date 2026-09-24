@@ -133,7 +133,7 @@ export const LoadingDialog: React.FC = () => {
                             {message}
                         </Text>
                     )}
-                    {!!actions && actions.length > 0 && (
+                    {actions?.length > 0 && (
                         <View style={styles.actionsContainer}>
                             {actions.map(({ title, onPress }, index) => (
                                 <Button
@@ -142,7 +142,6 @@ export const LoadingDialog: React.FC = () => {
                                     onPress={onPress}
                                     variant={ButtonVariant.Secondary}
                                     size={ButtonSize.Small}
-                                    style={styles.actionButton}
                                 />
                             ))}
                         </View>
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
         elevation: 8,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
-        shadowRadius: 8
+        shadowRadius: 8,
     },
     spinnerContainer: {
         padding: 8
@@ -188,13 +187,10 @@ const styles = StyleSheet.create({
         lineHeight: 22
     },
     actionsContainer: {
-        width: '100%',
         marginTop: 16,
         gap: 8,
+        alignSelf: 'stretch'
     },
-    actionButton: {
-        width: '100%',
-    }
 });
 
 export default LoadingDialog;
