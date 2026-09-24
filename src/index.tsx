@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
-    TouchableOpacity,
     ActivityIndicator,
     StyleSheet,
     Animated,
@@ -14,28 +13,46 @@ import {
     actions,
     selector
 } from '@codexporer.io/expo-link-stores';
+import { useAppTheme } from '@codexporer.io/expo-app-theme';
+import { Button, ButtonVariant, ButtonSize } from '@codexporer.io/expo-button';
+
+export interface LoadingDialogActionOption {
+    title: string;
+    onPress: () => void;
+}
+
+export interface ShowLoadingDialogOptions {
+    message?: string;
+    actions?: LoadingDialogActionOption[] | null;
+}
+
+export interface LoadingDialogState {
+    isVisible: boolean;
+    message: string;
+    actions: LoadingDialogActionOption[] | null;
+}
 
 const Store = createStore({
     initialState: {
         ...initialState,
         isVisible: false,
         message: '',
-        actions: null
+        actions: null as LoadingDialogActionOption[] | null
     },
     actions: {
         ...actions,
-        show: ({ message = '', actions = null } = {}) => ({ setState, getState }) => {
+        show: ({ message = '', actions = null }: ShowLoadingDialogOptions = {}) => ({ setState, getState }: any) => {
             const current = getState();
             if (current.message !== message || current.actions !== actions) {
                 setState({ isVisible: true, message, actions });
             }
         },
-        setMessage: message => ({ setState, getState }) => {
+        setMessage: (message: string) => ({ setState, getState }: any) => {
             if (getState().message !== message) {
                 setState({ message });
             }
         },
-        hide: () => ({ setState, getState }) => {
+        hide: () => ({ setState, getState }: any) => {
             const current = getState();
             if (current.isVisible || current.message || current.actions) {
                 setState({ isVisible: false, message: '', actions: null });
@@ -45,35 +62,15 @@ const Store = createStore({
     name: 'LoadingDialogActions'
 });
 
-const useLoadingDialogState = createHook(Store, { selector: state => selector(state) });
+const useLoadingDialogState = createHook(Store, { selector: (state: any) => selector(state) });
 
 export const useLoadingDialogActions = createHook(Store, { selector: null });
 
-const LoadingDialogContext = createContext(null);
-
-export const LoadingDialogProvider = ({ children, theme }) => {
-    return (
-        <LoadingDialogContext.Provider value={theme}>
-            {children}
-            <LoadingDialog />
-        </LoadingDialogContext.Provider>
-    );
-};
-
-const useLoadingDialogTheme = () => {
-    const context = useContext(LoadingDialogContext);
-    if (!context) {
-        throw new Error('useLoadingDialogTheme must be used within a LoadingDialogProvider with a mandatory theme prop.');
-    }
-    return context;
-};
-
-const LoadingDialog = () => {
+export const LoadingDialog: React.FC = () => {
     const [{ isVisible, message, actions }] = useLoadingDialogState();
-    const theme = useLoadingDialogTheme();
-    const { colors } = theme;
+    const theme = useAppTheme();
 
-    const [mounted, setMounted] = useState(isVisible);
+    const [mounted, setMounted] = useState<boolean>(isVisible);
     const opacity = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -122,37 +119,34 @@ const LoadingDialog = () => {
             ]}
             pointerEvents={isVisible ? 'auto' : 'none'}
         >
-            <View style={[styles.overlay, { backgroundColor: colors.overlayBackground }]}>
-                <View style={[styles.dialogContainer, { backgroundColor: colors.dialogBackground, shadowColor: colors.shadowColor }]}>
+            <View style={[styles.overlay, { backgroundColor: 'rgba(0, 0, 0, 0.6)' }]}>
+                <View style={[styles.dialogContainer, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
                     <View style={styles.spinnerContainer}>
                         <ActivityIndicator
                             animating
-                            color={colors.spinner}
+                            color={theme.primary}
                             size="large"
                         />
                     </View>
                     {!!message && (
-                        <Text style={[styles.message, { color: colors.messageText }]}>
+                        <Text style={[styles.message, { color: theme.text }]}>
                             {message}
                         </Text>
                     )}
-                    {actions?.length > 0 && actions.map(({ title, onPress }, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={onPress}
-                            style={[
-                                styles.button,
-                                {
-                                    backgroundColor: colors.buttonBackground,
-                                    borderColor: colors.buttonBorder
-                                }
-                            ]}
-                        >
-                            <Text style={[styles.buttonText, { color: colors.buttonText }]}>
-                                {title}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                    {!!actions && actions.length > 0 && (
+                        <View style={styles.actionsContainer}>
+                            {actions.map(({ title, onPress }, index) => (
+                                <Button
+                                    key={index}
+                                    title={title}
+                                    onPress={onPress}
+                                    variant={ButtonVariant.Secondary}
+                                    size={ButtonSize.Medium}
+                                    style={styles.actionButton}
+                                />
+                            ))}
+                        </View>
+                    )}
                 </View>
             </View>
         </Animated.View>
@@ -171,17 +165,17 @@ const styles = StyleSheet.create({
         padding: 24
     },
     dialogContainer: {
-        minWidth: 140,
+        minWidth: 160,
         minHeight: 140,
-        maxWidth: 250,
-        borderRadius: 16,
-        padding: 20,
+        maxWidth: 280,
+        borderRadius: 20,
+        padding: 24,
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4
+        elevation: 8,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8
     },
     spinnerContainer: {
         padding: 8
@@ -193,17 +187,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 22
     },
-    button: {
+    actionsContainer: {
         width: '100%',
         marginTop: 16,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        alignItems: 'center'
+        gap: 8,
     },
-    buttonText: {
-        fontSize: 16,
-        fontWeight: '600'
+    actionButton: {
+        width: '100%',
     }
 });
+
+export default LoadingDialog;

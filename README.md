@@ -1,58 +1,32 @@
 # `@codexporer.io/expo-loading-dialog`
 
-Global modal loading dialog state management and component for React Native applications. Automatically renders its overlay when mounted at the app root.
+Global modal loading dialog state management and component for React Native applications. Automatically renders its overlay when `<LoadingDialog />` is placed in your application hierarchy (inside `AppThemeProvider`).
 
 ## Prerequisites
 
-Ensure `react-sweet-state`, `deprecated-react-native-prop-types`, and `@codexporer.io/expo-link-stores` are installed in your workspace:
+Ensure `react-sweet-state`, `@codexporer.io/expo-link-stores`, `@codexporer.io/expo-app-theme`, and `@codexporer.io/expo-button` are installed in your workspace:
 
 ```bash
-yarn add react-sweet-state deprecated-react-native-prop-types
+yarn add react-sweet-state @codexporer.io/expo-link-stores @codexporer.io/expo-app-theme @codexporer.io/expo-button
 ```
 
-## Theme & Provider Setup
+## Setup & Theming
 
-Wrap your application root inside `LoadingDialogProvider` and supply a mandatory `theme` object. `LoadingDialogProvider` automatically renders the `<LoadingDialog />` overlay component internally.
-
-### `LoadingDialogTheme` Interface
-
-```typescript
-interface LoadingDialogTheme {
-  colors: {
-    dialogBackground: string;   // Dialog container background color
-    spinner: string;            // ActivityIndicator loading spinner color
-    messageText: string;        // Loading message text color
-    buttonText: string;         // Action button text color
-    buttonBackground: string;   // Action button background color
-    buttonBorder: string;       // Action button border color
-    overlayBackground: string; // Backdrop overlay background color
-  };
-}
-```
+Simply render `<LoadingDialog />` near the root of your application inside `AppThemeProvider`. Theme colors (`surface`, `primary`, `text`) are automatically retrieved via `@codexporer.io/expo-app-theme`.
 
 ### Setup Example
 
 ```tsx
-import React, { useMemo } from 'react';
-import { LoadingDialogProvider, LoadingDialogTheme } from '@codexporer.io/expo-loading-dialog';
+import React from 'react';
+import { AppThemeProvider } from '@codexporer.io/expo-app-theme';
+import { LoadingDialog } from '@codexporer.io/expo-loading-dialog';
 
-export function AppProviders({ children }) {
-  const loadingDialogTheme = useMemo<LoadingDialogTheme>(() => ({
-    colors: {
-      dialogBackground: '#ffffff',
-      spinner: '#6366f1',
-      messageText: '#18181b',
-      buttonText: '#6366f1',
-      buttonBackground: '#f4f4f5',
-      buttonBorder: '#e4e4e7',
-      overlayBackground: 'rgba(0, 0, 0, 0.5)'
-    }
-  }), []);
-
+export function App() {
   return (
-    <LoadingDialogProvider theme={loadingDialogTheme}>
-      {children}
-    </LoadingDialogProvider>
+    <AppThemeProvider>
+      {/* App Navigator and components */}
+      <LoadingDialog />
+    </AppThemeProvider>
   );
 }
 ```
@@ -63,15 +37,15 @@ Use `useLoadingDialogActions()` anywhere in your component tree or store actions
 
 ```tsx
 import React, { useEffect } from 'react';
-import { Button } from 'react-native';
 import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
+import { Button } from '@codexporer.io/expo-button';
 
 export function SyncScreen({ isSyncing }: { isSyncing: boolean }) {
   const [, { show: showLoadingDialog, hide: hideLoadingDialog }] = useLoadingDialogActions();
 
   useEffect(() => {
     if (isSyncing) {
-      showLoadingDialog({ message: 'Syncing baby logs...' });
+      showLoadingDialog({ message: 'Syncing track...' });
     } else {
       hideLoadingDialog();
     }
