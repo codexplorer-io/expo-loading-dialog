@@ -1,58 +1,102 @@
 # `@codexporer.io/expo-loading-dialog`
 
-Global modal loading dialog state management and component for React Native applications. Automatically renders its overlay when `<LoadingDialog />` is placed in your application hierarchy (inside `AppThemeProvider`).
+Global modal loading dialog state management and component for React Native applications. Built on top of `@codexporer.io/expo-dialog` and `react-sweet-state` with non-blocking imperative controls and dynamic theme integration.
 
-## Prerequisites
-
-Ensure `react-sweet-state`, `@codexporer.io/expo-link-stores`, `@codexporer.io/expo-app-theme`, and `@codexporer.io/expo-button` are installed in your workspace:
+## Installation & Peer Dependencies
 
 ```bash
-yarn add react-sweet-state @codexporer.io/expo-link-stores @codexporer.io/expo-app-theme @codexporer.io/expo-button
+yarn add @codexporer.io/expo-loading-dialog
 ```
 
-## Setup & Theming
+Ensure peer dependencies are installed in your workspace:
+```bash
+yarn add react-sweet-state @codexporer.io/expo-dialog @codexporer.io/expo-link-stores @codexporer.io/expo-app-theme @codexporer.io/expo-button
+```
 
-Simply render `<LoadingDialog />` near the root of your application inside `AppThemeProvider`. Theme colors (`surface`, `primary`, `text`) are automatically retrieved via `@codexporer.io/expo-app-theme`.
+## Quick Start
 
-### Setup Example
+### 1. Mount `<LoadingDialog />` near App Root
+
+Render `<LoadingDialog />` near the top level of your component tree inside `ThemeProvider`:
 
 ```tsx
 import React from 'react';
-import { AppThemeProvider } from '@codexporer.io/expo-app-theme';
+import { ThemeProvider, defaultThemeConfig } from '@codexporer.io/expo-app-theme';
 import { LoadingDialog } from '@codexporer.io/expo-loading-dialog';
 
 export function App() {
   return (
-    <AppThemeProvider>
+    <ThemeProvider themeConfig={defaultThemeConfig}>
       {/* App Navigator and components */}
       <LoadingDialog />
-    </AppThemeProvider>
+    </ThemeProvider>
   );
 }
 ```
 
-## Hook Usage
+### 2. Control Dialog Imperatively
 
-Use `useLoadingDialogActions()` anywhere in your component tree or store actions to trigger or hide the dialog overlay.
+Use `useLoadingDialogActions()` anywhere in your component tree or asynchronous routines:
 
 ```tsx
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Button, View } from 'react-native';
 import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
-import { Button } from '@codexporer.io/expo-button';
 
-export function SyncScreen({ isSyncing }: { isSyncing: boolean }) {
-  const [, { show: showLoadingDialog, hide: hideLoadingDialog }] = useLoadingDialogActions();
+export function SyncScreen() {
+  const [, { show, setMessage, hide }] = useLoadingDialogActions();
 
-  useEffect(() => {
-    if (isSyncing) {
-      showLoadingDialog({ message: 'Syncing track...' });
-    } else {
-      hideLoadingDialog();
-    }
+  const handleExport = async () => {
+    show({ message: 'Initializing render...' });
 
-    return () => hideLoadingDialog();
-  }, [isSyncing, showLoadingDialog, hideLoadingDialog]);
+    setTimeout(() => {
+      setMessage('Encoding audio visualizer frames...');
+    }, 1500);
 
-  return <Button title="Sync Data" onPress={() => console.log('Syncing...')} />;
+    setTimeout(() => {
+      hide();
+    }, 3000);
+  };
+
+  return (
+    <View style={{ padding: 16 }}>
+      <Button title="Export Video" onPress={handleExport} />
+    </View>
+  );
 }
 ```
+
+### 3. Loading Dialog with Cancellation Action
+
+```tsx
+show({
+  message: 'Downloading assets...',
+  actions: [
+    {
+      title: 'Cancel',
+      onPress: () => {
+        abortController.abort();
+        hide();
+      }
+    }
+  ]
+});
+```
+
+## API Reference
+
+### `useLoadingDialogActions()`
+Returns a tuple `[, actions]` where `actions` provides:
+- `show({ message, actions }: ShowLoadingDialogOptions)`: Displays the dialog with optional message and action buttons.
+- `setMessage(message: string)`: Updates the displayed message without re-triggering animations.
+- `hide()`: Smoothly closes the dialog overlay.
+
+### Options
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `message` | `string` | Text displayed below the loading spinner |
+| `actions` | `LoadingDialogActionOption[]` | Optional action buttons rendered beneath the message |
+
+## License
+
+MIT

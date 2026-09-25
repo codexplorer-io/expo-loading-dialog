@@ -6,6 +6,7 @@
     "react": "*",
     "react-native": "*",
     "react-sweet-state": "*",
+    "@codexporer.io/expo-dialog": "*",
     "@codexporer.io/expo-link-stores": "*",
     "@codexporer.io/expo-app-theme": "*",
     "@codexporer.io/expo-button": "*",

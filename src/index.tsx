@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import {
     View,
     Text,
     ActivityIndicator,
-    StyleSheet,
-    Animated,
-    BackHandler
+    StyleSheet
 } from 'react-native';
 import { createStore, createHook } from 'react-sweet-state';
 import {
@@ -14,6 +12,7 @@ import {
     selector
 } from '@codexporer.io/expo-link-stores';
 import { useAppTheme } from '@codexporer.io/expo-app-theme';
+import { Dialog } from '@codexporer.io/expo-dialog';
 import { Button, ButtonVariant, ButtonSize } from '@codexporer.io/expo-button';
 
 export interface LoadingDialogActionOption {
@@ -70,100 +69,46 @@ export const LoadingDialog: React.FC = () => {
     const [{ isVisible, message, actions }] = useLoadingDialogState();
     const theme = useAppTheme();
 
-    const [mounted, setMounted] = useState<boolean>(isVisible);
-    const opacity = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        if (isVisible) {
-            setMounted(true);
-            Animated.timing(opacity, {
-                toValue: 1,
-                duration: 200,
-                useNativeDriver: true
-            }).start();
-        } else {
-            Animated.timing(opacity, {
-                toValue: 0,
-                duration: 150,
-                useNativeDriver: true
-            }).start(() => {
-                setMounted(false);
-            });
-        }
-    }, [isVisible, opacity]);
-
-    useEffect(() => {
-        if (!isVisible) {
-            return;
-        }
-
-        const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-            return true;
-        });
-
-        return () => {
-            subscription?.remove();
-        };
-    }, [isVisible]);
-
-    if (!mounted) {
-        return null;
-    }
-
     return (
-        <Animated.View
-            style={[
-                StyleSheet.absoluteFill,
-                styles.overlayContainer,
-                { opacity }
-            ]}
-            pointerEvents={isVisible ? 'auto' : 'none'}
+        <Dialog
+            visible={isVisible}
+            dismissOnBackdropPress={false}
+            dismissOnHardwareBackPress={false}
+            trapHardwareBackPress={true}
+            style={styles.dialogContainer}
         >
-            <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
-                <View style={[styles.dialogContainer, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
-                    <View style={styles.spinnerContainer}>
-                        <ActivityIndicator
-                            animating
-                            color={theme.primary}
-                            size="large"
-                        />
-                    </View>
-                    {!!message && (
-                        <Text style={[styles.message, { color: theme.text }]}>
-                            {message}
-                        </Text>
-                    )}
-                    {actions?.length > 0 && (
-                        <View style={styles.actionsContainer}>
-                            {actions.map(({ title, onPress }, index) => (
-                                <Button
-                                    key={index}
-                                    title={title}
-                                    onPress={onPress}
-                                    variant={ButtonVariant.Secondary}
-                                    size={ButtonSize.Small}
-                                />
-                            ))}
-                        </View>
-                    )}
-                </View>
+            <View style={styles.spinnerContainer}>
+                <ActivityIndicator
+                    animating
+                    color={theme.primary}
+                    size="large"
+                />
             </View>
-        </Animated.View>
+            {!!message && (
+                <Text style={[styles.message, { color: theme.text }]}>
+                    {message}
+                </Text>
+            )}
+            {actions && actions.length > 0 && (
+                <View style={styles.actionsContainer}>
+                    {actions.map(({ title, onPress }: LoadingDialogActionOption, index: number) => (
+                        <Button
+                            key={index}
+                            title={title}
+                            onPress={onPress}
+                            variant={ButtonVariant.Secondary}
+                            size={ButtonSize.Small}
+                        />
+                    ))}
+                </View>
+            )}
+        </Dialog>
     );
 };
 
 const styles = StyleSheet.create({
-    overlayContainer: {
-        zIndex: 99999,
-        elevation: 99999,
-    },
-    overlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 24
-    },
     dialogContainer: {
+        width: undefined,
         minWidth: 160,
         minHeight: 140,
         maxWidth: 280,
