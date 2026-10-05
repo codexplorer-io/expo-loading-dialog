@@ -5,7 +5,7 @@ import {
     ActivityIndicator,
     StyleSheet
 } from 'react-native';
-import { createStore, createHook } from 'react-sweet-state';
+import { createStore, createHook, createActionsHook } from 'react-sweet-state';
 import {
     initialState,
     actions,
@@ -63,7 +63,7 @@ const Store = createStore({
 
 const useLoadingDialogState = createHook(Store, { selector: (state: any) => selector(state) });
 
-export const useLoadingDialogActions = createHook(Store, { selector: null });
+export const useLoadingDialogActions = createActionsHook(Store);
 
 export const LoadingDialog: React.FC = () => {
     const [{ isVisible, message, actions }] = useLoadingDialogState();

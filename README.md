@@ -44,7 +44,7 @@ import { Button, View } from 'react-native';
 import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
 
 export function SyncScreen() {
-  const [, { show, setMessage, hide }] = useLoadingDialogActions();
+  const { show, setMessage, hide } = useLoadingDialogActions();
 
   const handleExport = async () => {
     show({ message: 'Initializing render...' });
@@ -86,7 +86,7 @@ show({
 ## API Reference
 
 ### `useLoadingDialogActions()`
-Returns a tuple `[, actions]` where `actions` provides:
+Returns an actions object providing:
 - `show({ message, actions }: ShowLoadingDialogOptions)`: Displays the dialog with optional message and action buttons.
 - `setMessage(message: string)`: Updates the displayed message without re-triggering animations.
 - `hide()`: Smoothly closes the dialog overlay.

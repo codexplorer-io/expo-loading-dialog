@@ -41,7 +41,7 @@ import { linkStores } from '@codexporer.io/expo-link-stores';
 import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
 
 export function RootStoreLinker() {
-  const [, loadingDialogActions] = useLoadingDialogActions();
+  const loadingDialogActions = useLoadingDialogActions();
 
   useEffect(() => {
     if (loadingDialogActions) {
@@ -66,7 +66,7 @@ import { useLoadingDialogActions } from '@codexporer.io/expo-loading-dialog';
 import { Button } from '@codexporer.io/expo-button';
 
 export function DemoScreen() {
-  const [, { show, setMessage, hide }] = useLoadingDialogActions();
+  const { show, setMessage, hide } = useLoadingDialogActions();
 
   const handlePerformTask = async () => {
     show({ message: 'Initializing sync...' });
@@ -112,7 +112,7 @@ show({
 ## API Reference
 
 ### `useLoadingDialogActions()`
-Returns a tuple `[, actions]` where `actions` provides:
+Returns an actions object providing:
 - `show({ message, actions }: ShowLoadingDialogOptions)`: Displays the dialog with optional message and action buttons.
 - `setMessage(message: string)`: Updates the displayed message without re-triggering animations or opening/closing transitions.
 - `hide()`: Smoothly closes the dialog overlay.
@@ -136,7 +136,7 @@ Returns a tuple `[, actions]` where `actions` provides:
 1. **Mounting**: Always mount `<LoadingDialog />` inside `ThemeProvider`. Never look for or create a `LoadingDialogProvider`.
 2. **Destructured Actions Pattern**: ALWAYS destructure:
    ```tsx
-   const [, { show, setMessage, hide }] = useLoadingDialogActions();
+   const { show, setMessage, hide } = useLoadingDialogActions();
    ```
    Do NOT use optional chaining (`?.`) on `show` or `hide`.
 3. **Unmount Cleanup**: In `useEffect` hooks controlling loading dialog state during component lifecycle, ALWAYS return an unmount cleanup function:
