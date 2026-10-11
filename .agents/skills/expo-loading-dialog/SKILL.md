@@ -10,6 +10,13 @@ description: Instructions for state-guarded modal loading dialog implementation 
 
 ---
 
+## When to Use
+- Displaying an imperative modal spinner with status text during long-running async operations (e.g. video rendering, image flattening, asset syncing).
+- Updating progress status messages dynamically with `setMessage` during multi-step background tasks.
+- Providing cancel buttons on modal loaders to abort pending asynchronous workflows.
+
+---
+
 ## Required Setup
 
 ### 1. Mount `<LoadingDialog />` in the Root Tree
@@ -131,7 +138,7 @@ Returns an actions object providing:
 
 ---
 
-## Mandatory Rules & Guidelines
+## Critical Rules & Guidelines
 
 1. **Mounting**: Always mount `<LoadingDialog />` inside `ThemeProvider`. Never look for or create a `LoadingDialogProvider`.
 2. **Destructured Actions Pattern**: ALWAYS destructure:
