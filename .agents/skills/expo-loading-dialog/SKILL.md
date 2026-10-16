@@ -10,6 +10,25 @@ description: Instructions for state-guarded modal loading dialog implementation 
 
 ---
 
+## Peer Dependencies
+
+All 7 peer dependencies are required and must be installed in consuming projects (none are optional):
+- `react`: `*`
+- `react-native`: `*`
+- `react-sweet-state`: `*`
+- `@codexporer.io/expo-dialog`: `*`
+- `@codexporer.io/expo-link-stores`: `*`
+- `@codexporer.io/expo-app-theme`: `*`
+- `@codexporer.io/expo-button`: `*`
+
+---
+
+## Theme Requirement
+
+`<LoadingDialog />` calls `useAppTheme()` from `@codexporer.io/expo-app-theme` to retrieve theme tokens (`theme.primary` for the spinner and `theme.text` for the message). Consuming applications **must** mount `<ThemeProvider>` above `<LoadingDialog />`.
+
+---
+
 ## When to Use
 - Displaying an imperative modal spinner with status text during long-running async operations (e.g. video rendering, image flattening, asset syncing).
 - Updating progress status messages dynamically with `setMessage` during multi-step background tasks.
@@ -20,19 +39,20 @@ description: Instructions for state-guarded modal loading dialog implementation 
 ## Required Setup
 
 ### 1. Mount `<LoadingDialog />` in the Root Tree
-Render `<LoadingDialog />` near the top level of your component tree inside `ThemeProvider` (from `@codexporer.io/expo-app-theme` or the app's theme provider):
 
-> **NOTE:** Do **not** use `LoadingDialogProvider` (it does not exist). Simply mount `<LoadingDialog />` as a component inside `ThemeProvider`.
+Render `<LoadingDialog />` near the top level of your component tree inside `<ThemeProvider>` from `@codexporer.io/expo-app-theme`:
+
+> **NOTE:** Do **not** use `LoadingDialogProvider` (it does not exist). Simply mount `<LoadingDialog />` as a component inside `<ThemeProvider>`.
 
 ```tsx
 import React from 'react';
-import { ThemeProvider } from '../providers/ThemeProvider';
+import { ThemeProvider, defaultThemeConfig } from '@codexporer.io/expo-app-theme';
 import { LoadingDialog } from '@codexporer.io/expo-loading-dialog';
 
-export default function RootLayout() {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      {/* App Navigators and Screens */}
+    <ThemeProvider themeConfig={defaultThemeConfig}>
+      {children}
       <LoadingDialog />
     </ThemeProvider>
   );
@@ -40,6 +60,7 @@ export default function RootLayout() {
 ```
 
 ### 2. (Optional) Cross-Package Store Linking
+
 To allow decoupled packages (e.g. `@codexporer.io/expo-image-picker`) to trigger loading dialogs without direct dependencies, link the store at app initialization:
 
 ```tsx
@@ -99,6 +120,8 @@ export function DemoScreen() {
 
 ### Loading Dialog with Action Buttons (e.g. Cancel)
 
+Action buttons are rendered using `<Button variant={ButtonVariant.Secondary} size={ButtonSize.Small} />` from `@codexporer.io/expo-button`:
+
 ```tsx
 show({
   message: 'Downloading assets...',
@@ -119,18 +142,23 @@ show({
 ## API Reference
 
 ### `useLoadingDialogActions()`
-Returns an actions object providing:
-- `show({ message, actions }: ShowLoadingDialogOptions)`: Displays the dialog with optional message and action buttons.
-- `setMessage(message: string)`: Updates the displayed message without re-triggering animations or opening/closing transitions.
-- `hide()`: Smoothly closes the dialog overlay.
+
+Returns the store actions object providing:
+- `show({ message, actions }: ShowLoadingDialogOptions)`: Displays the dialog. State-guarded: only updates if `message` or `actions` changed.
+- `setMessage(message: string)`: Updates the displayed message without re-triggering opening animations. State-guarded: only updates if `message` changed.
+- `hide()`: Closes the dialog overlay. State-guarded: only updates if `isVisible`, `message`, or `actions` are currently set.
 
 ### Options
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `message` | `string` | Text displayed below the loading spinner |
-| `actions` | `LoadingDialogActionOption[] \| null` | Optional action buttons rendered beneath the message |
 
-### `LoadingDialogActionOption`
+#### `ShowLoadingDialogOptions`
+
+| Property | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `message` | `string` | `''` | Text displayed below the loading spinner |
+| `actions` | `LoadingDialogActionOption[] \| null` | `null` | Optional action buttons rendered beneath the message |
+
+#### `LoadingDialogActionOption`
+
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `title` | `string` | Button text label |
@@ -150,4 +178,7 @@ Returns an actions object providing:
    ```tsx
    return () => hide();
    ```
-4. **No Redundant Re-renders**: The store internally state-guards `show`, `hide`, and `setMessage` calls to prevent infinite re-render loops.
+4. **State-Guarding**: The store internally state-guards `show`, `hide`, and `setMessage` calls to prevent unnecessary re-render cycles.
+5. **Modal Behavior**: The underlying dialog is configured with `dismissOnBackdropPress={false}`, `dismissOnHardwareBackPress={false}`, and `trapHardwareBackPress={true}`.
+6. **All 7 Peer Dependencies Required**: Consuming applications must install all 7 peer dependencies without marking any as optional.
+

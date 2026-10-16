@@ -9,7 +9,6 @@
     "@codexporer.io/expo-dialog": "*",
     "@codexporer.io/expo-link-stores": "*",
     "@codexporer.io/expo-app-theme": "*",
-    "@codexporer.io/expo-button": "*",
-    "deprecated-react-native-prop-types": "*"
+    "@codexporer.io/expo-button": "*"
   }
 }
